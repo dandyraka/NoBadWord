@@ -12,7 +12,7 @@ const startServer = () => {
             // Force it to keep the current session
             client.onStateChanged((state) => {
                 console.log('[Client State]', state)
-                if (state === 'CONFLICT') client.forceRefocus()
+                if (state === 'CONFLICT' || state === 'UNLAUNCHED') client.forceRefocus()
             })
 
             // listening on message
@@ -20,6 +20,13 @@ const startServer = () => {
                 // Message Handler
                 msgHandler(client, message)
             })
+
+            // listen group invitation
+            client.onAddedToGroup(({ groupMetadata: { id }, contact: { name } }) =>
+                client.getGroupMembersId(id)
+                    .then((ids) => {
+                        console.log('[CLIENT]', color(`Invited to Group. [ ${name} : ${ids.length}]`, 'yellow'))
+                    }))
         })
         .catch((err) => new Error(err))
 }
