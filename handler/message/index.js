@@ -51,9 +51,18 @@ module.exports = msgHandler = async (client, message) => {
                     await client.sendText(from, "Hanya dapat dilakukan dalam Grup.")
                 }
                 break
-            case 'reset':
+            case 'klasemen':
                 if(isGroupMsg){
-                    await client.sendText(from, "Ya, ini adalah klasemen")
+                    const klasemen = db.get('group').filter({id: groupId}).map('members').value()[0]
+                    let urut = Object.entries(klasemen).map(([key, val]) => ({id: key, ...val})).sort((a, b) => b.denda - a.denda);
+                    let textKlas = "*Klasemen Denda Sementara*\n"
+                    let i = 1;
+                    urut.forEach((klsmn) => {
+                        textKlas += i+". @"+klsmn.id.replace('@c.us', '')+" ➤ "+klsmn.denda+"\n"
+                        //console.log(element.denda)
+                        i++
+                    });
+                    await client.sendTextWithMentions(from, textKlas)
                 } else {
                     await client.sendText(from, "Hanya dapat dilakukan dalam Grup.")
                 }
@@ -66,22 +75,23 @@ module.exports = msgHandler = async (client, message) => {
         const inArray = (needle, haystack) => {
             let length = haystack.length;
             for(let i = 0; i < length; i++) {
-                if(haystack[i].id == needle) return true;
+                if(haystack[i].id == needle) return i;
             }
             return false;
         }
 
         if(!isCmd && isGroupMsg){
             const find = db.get('group').find({ id: groupId }).value()
+            const isKasar = await cariKasar(chats)
             if(find && find.id === groupId){
-                //const cekuser = db.get('group').filter({id: groupId}).map('members[0]').find({ id: pengirim }).value()
                 const cekuser = db.get('group').filter({id: groupId}).map('members').value()[0]
-                if(cekuser && inArray(pengirim, cekuser)){
-                    const isKasar = await cariKasar(chats)
-                    console.log(isKasar)
+                const isIn = inArray(pengirim, cekuser)
+                if(cekuser && isIn !== false){
                     if(isKasar){
-                        const denda = db.get('group').filter({id: groupId}).map('members[0]').find({ id: pengirim }).value()
-                        console.log(denda)
+                        const denda = db.get('group').filter({id: groupId}).map('members['+isIn+']').find({ id: pengirim }).update('denda', n => n + 5000).write()
+                        if(denda){
+                            await client.reply(from, "Jangan badword bodoh\nDenda +5000\nTotal : Rp."+denda.denda, id)
+                        }
                     } else {
                         console.log("ganemu kata kasar")
                     }
@@ -90,7 +100,12 @@ module.exports = msgHandler = async (client, message) => {
                     db.get('group').find({ id: groupId }).set('members', getMembers).write()
                 }
             } else {
-                db.get('group').push({ id: groupId, members: [{id: pengirim, denda: 0}] }).write()
+                if(isKasar){
+                    db.get('group').push({ id: groupId, members: [{id: pengirim, denda: 5000}] }).write()
+                    await client.reply(from, "Jangan badword bodoh\nDenda +5000\nTotal : Rp.5000", id)
+                } else {
+                    db.get('group').push({ id: groupId, members: [{id: pengirim, denda: 0}] }).write()
+                }
             }
         }
     } catch (err) {
