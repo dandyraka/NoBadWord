@@ -3,4 +3,4 @@ node_modules
 debug.log
 *.data.json
 package-lock.json
-data/group.json
+data
