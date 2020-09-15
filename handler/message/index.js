@@ -1,4 +1,4 @@
-const { color} = require('../../util')
+const { color } = require('../../util')
 const { cariKasar } = require('../../lib')
 const moment = require('moment-timezone')
 const appRoot = require('app-root-path')
@@ -51,12 +51,23 @@ module.exports = msgHandler = async (client, message) => {
         if (isCmd && !isGroupMsg) { console.log(color('[EXEC]'), color(moment(t * 1000).format('DD/MM/YY HH:mm:ss'), 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname)) }
         if (isCmd && isGroupMsg) { console.log(color('[EXEC]'), color(moment(t * 1000).format('DD/MM/YY HH:mm:ss'), 'yellow'), color(`${command} [${args.length}]`), 'from', color(pushname), 'in', color(name || formattedTitle)) }
         switch (command) {
+            case 'menu':
+                const menu = "*MENU*\n1. *#klasemen* : klasemen denda\n2. *#reset* : reset klasemen denda\n3. *#about* : tentang bot ini"
+                await client.sendText(from, menu)
+                break
+            case 'about':
+                const about = 
+                '*ABOUT*\n'+
+                'Bot ini dikembangkan oleh *Dandy - JNCK Media*\n'+
+                'Terima kasih juga untuk *Yoga Sakti* dan *Open-WA*';
+                await client.sendText(from, about)
+                break
             case 'reset':
                 if(isGroupMsg){
                     if(isGroupAdmins){
                         const reset = db.get('group').find({ id: groupId }).assign({ members: []}).write()
                         if(reset){
-                            await client.sendText(from, "Klasemen telah direset")
+                            await client.sendText(from, "Klasemen telah direset.")
                         }
                     } else {
                         await client.sendText(from, "Klasemen hanya dapat direset oleh Admin Grup.")
@@ -93,7 +104,7 @@ module.exports = msgHandler = async (client, message) => {
                     if(isKasar){
                         const denda = db.get('group').filter({id: groupId}).map('members['+isIn+']').find({ id: pengirim }).update('denda', n => n + 5000).write()
                         if(denda){
-                            await client.reply(from, "Jangan badword bodoh\nDenda +5000\nTotal : Rp"+formatin(denda.denda), id)
+                            await client.reply(from, "Jangan badword bodoh\nDenda +5.000\nTotal : Rp"+formatin(denda.denda), id)
                         }
                     }
                 } else {
@@ -111,14 +122,13 @@ module.exports = msgHandler = async (client, message) => {
                         } else {
                             upd = db.get('group').filter({id: groupId}).map('members[0]').push( {id: pengirim, denda: 0} ).value()
                         }
-                        
                         db.get('group').find({ id: groupId }).set('members', upd).write()
                     }
                 }
             } else {
                 if(isKasar){
                     db.get('group').push({ id: groupId, members: [{id: pengirim, denda: 5000}] }).write()
-                    await client.reply(from, "Jangan badword bodoh\nDenda +5000\nTotal : Rp5.000", id)
+                    await client.reply(from, "Jangan badword bodoh\nDenda +5.000\nTotal : Rp5.000", id)
                 } else {
                     db.get('group').push({ id: groupId, members: [{id: pengirim, denda: 0}] }).write()
                 }
