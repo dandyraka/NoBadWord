@@ -100,6 +100,8 @@ module.exports = msgHandler = async (client, message) => {
             if(find && find.id === groupId){
                 const cekuser = db.get('group').filter({id: groupId}).map('members').value()[0]
                 const isIn = inArray(pengirim, cekuser)
+                //console.log(cekuser)
+                //console.log(isIn)
                 if(cekuser && isIn !== false){
                     if(isKasar){
                         const denda = db.get('group').filter({id: groupId}).map('members['+isIn+']').find({ id: pengirim }).update('denda', n => n + 5000).write()
@@ -116,13 +118,15 @@ module.exports = msgHandler = async (client, message) => {
                             db.get('group').find({ id: groupId }).set('members', [{id: pengirim, denda: 0}]).write()
                         }
                     } else {
-                        let upd;
+                        //let upd;
+                        const cekuser = db.get('group').filter({id: groupId}).map('members').value()[0]
                         if(isKasar){
-                            upd = db.get('group').filter({id: groupId}).map('members[0]').push( {id: pengirim, denda: 5000} ).value()
+                            cekuser.push({id: pengirim, denda: 5000})
+                            await client.reply(from, "Jangan badword bodoh\nDenda +5.000", id)
                         } else {
-                            upd = db.get('group').filter({id: groupId}).map('members[0]').push( {id: pengirim, denda: 0} ).value()
+                            cekuser.push({id: pengirim, denda: 0})
                         }
-                        db.get('group').find({ id: groupId }).set('members', upd).write()
+                        db.get('group').find({ id: groupId }).set('members', cekuser).write()
                     }
                 }
             } else {
