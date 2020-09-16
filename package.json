@@ -9,12 +9,12 @@
   "author": "Dandy Raka",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YogaSakti/imageToSticker.git"
+    "url": "https://github.com/dandyraka/NoBadWord.git"
   },
   "bugs": {
-    "url": "https://github.com/YogaSakti/imageToSticker/issues"
+    "url": "https://github.com/dandyraka/NoBadWord/issues"
   },
-  "homepage": "https://github.com/YogaSakti/imageToSticker",
+  "homepage": "https://github.com/dandyraka/NoBadWord",
   "license": "ISC",
   "dependencies": {
     "@open-wa/wa-automate": "^2.0.22",
